@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>⚡ NOM  ⚡</title>
+    <title>⚡ NOM⚡</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>body { background:#0b111e; color:white; font-family:sans-serif; }</style>
 </head>
 <body class="min-h-screen flex flex-col items-center p-4">
 
+    <!-- MENU -->
     <div id="menu-container" class="w-full max-w-2xl mt-10 text-center">
         <h1 class="text-3xl font-black text-blue-400 mb-6">⚡ NOM  ⚡</h1>
         <div class="grid grid-cols-2 gap-4">
@@ -19,19 +20,22 @@
         </div>
     </div>
 
+    <!-- JUEGO -->
     <main id="game-container" class="hidden w-full max-w-xl bg-slate-900/40 p-6 rounded-2xl border border-slate-800">
-        <div class="flex justify-between items-center mb-4 text-sm font-bold">
-            <h1 id="game-title" class="text-blue-400 text-xl">⏳ 10s</h1>
-            <div>Record: <span id="record">0</span> | Puntos: <span id="score">0</span></div>
+        <div class="flex justify-between items-center mb-4">
+            <button onclick="backToMenu()" class="bg-slate-700 py-1 px-3 rounded-lg text-xs font-bold hover:bg-slate-600">⬅️ Menú</button>
+            <div class="text-sm font-bold text-slate-400">Record: <span id="record">0</span> | Puntos: <span id="score">0</span></div>
         </div>
         
+        <div class="text-center mb-4 font-bold text-blue-400 text-xl" id="game-title">⏳ 10s</div>
+
         <div class="bg-slate-950/60 p-6 mb-6 rounded-xl border border-slate-800 text-center">
             <div id="target-value" class="text-4xl font-black text-blue-500">--</div>
             <div id="target-condition" class="text-xs text-slate-400 uppercase mt-1">Requiere calibre para:</div>
         </div>
 
         <div id="matrix-container" class="grid grid-cols-4 sm:grid-cols-6 gap-2 mb-6"></div>
-        <div id="feedback" class="text-center font-bold text-lg p-2 rounded-lg h-12"></div>
+        <div id="feedback" class="text-center font-bold text-sm p-2 rounded-lg h-auto"></div>
     </main>
 
     <script>
@@ -44,6 +48,12 @@
             document.getElementById("menu-container").classList.add("hidden");
             document.getElementById("game-container").classList.remove("hidden");
             renderButtons(); generar();
+        }
+
+        function backToMenu() {
+            clearInterval(timer);
+            document.getElementById("game-container").classList.add("hidden");
+            document.getElementById("menu-container").classList.remove("hidden");
         }
 
         function renderButtons() {
@@ -59,6 +69,7 @@
             timeLeft = 10;
             currentObj = data[Math.floor(Math.random() * data.length)];
             document.getElementById("target-value").innerText = (mode==="310"?currentObj[temp]:currentObj.v) + " A";
+            document.getElementById("target-condition").innerText = mode==="310"?temp+"°C":"Tabla 250";
             clearInterval(timer);
             timer = setInterval(() => {
                 timeLeft--;
@@ -79,13 +90,14 @@
                 if(score > record) { record = score; document.getElementById("record").innerText = record; }
                 fb.className = "text-green-400 font-bold p-2";
                 fb.innerHTML = `✅ ¡Correcto!`;
+                setTimeout(generar, 1000);
             } else {
                 score = 0;
+                document.getElementById("score").innerText = score;
                 fb.className = "text-red-400 font-bold p-2";
-                fb.innerHTML = `❌ Error: ${targetVal}A requeridos.`;
+                fb.innerHTML = `❌ Fallaste.<br><span class='text-white'>Elegiste: ${sel} AWG (${selVal}A).<br>Requerías: ${targetVal}A.</span>`;
+                setTimeout(generar, 3000);
             }
-            document.getElementById("score").innerText = score;
-            setTimeout(generar, 1500);
         }
     </script>
 </body>
