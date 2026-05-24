@@ -3,15 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>⚡ NOM Game⚡</title>
+    <title>⚡ NOM  ⚡</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>body { background:#0b111e; color:white; font-family:sans-serif; }</style>
 </head>
 <body class="min-h-screen flex flex-col items-center p-4">
 
-    <!-- MENU -->
     <div id="menu-container" class="w-full max-w-2xl mt-10 text-center">
-        <h1 class="text-3xl font-black text-blue-400 mb-6">⚡ NOM⚡</h1>
+        <h1 class="text-3xl font-black text-blue-400 mb-6">⚡ NOM  ⚡</h1>
         <div class="grid grid-cols-2 gap-4">
             <button onclick="start('310','60')" class="bg-blue-800 p-4 rounded-xl font-bold">310 - 60°C</button>
             <button onclick="start('310','75')" class="bg-blue-700 p-4 rounded-xl font-bold">310 - 75°C</button>
@@ -20,11 +19,10 @@
         </div>
     </div>
 
-    <!-- JUEGO -->
     <main id="game-container" class="hidden w-full max-w-xl bg-slate-900/40 p-6 rounded-2xl border border-slate-800">
-        <div class="flex justify-between items-center mb-4">
-            <h1 id="game-title" class="font-bold text-blue-400 text-xl">--</h1>
-            <div class="text-sm font-bold">Puntos: <span id="score">0</span></div>
+        <div class="flex justify-between items-center mb-4 text-sm font-bold">
+            <h1 id="game-title" class="text-blue-400 text-xl">⏳ 10s</h1>
+            <div>Record: <span id="record">0</span> | Puntos: <span id="score">0</span></div>
         </div>
         
         <div class="bg-slate-950/60 p-6 mb-6 rounded-xl border border-slate-800 text-center">
@@ -33,25 +31,16 @@
         </div>
 
         <div id="matrix-container" class="grid grid-cols-4 sm:grid-cols-6 gap-2 mb-6"></div>
-        <div id="feedback" class="text-center font-bold text-lg p-2 rounded-lg"></div>
+        <div id="feedback" class="text-center font-bold text-lg p-2 rounded-lg h-12"></div>
     </main>
 
     <script>
-        const data = [
-            {c:"14", "60":15, "75":20, "90":25, v:15}, {c:"12", "60":20, "75":25, "90":30, v:20}, 
-            {c:"10", "60":30, "75":35, "90":40, v:60}, {c:"8", "60":40, "75":50, "90":55, v:100}, 
-            {c:"6", "60":55, "75":65, "90":75, v:200}, {c:"4", "60":70, "75":85, "90":95, v:300}, 
-            {c:"3", "60":85, "75":100, "90":110, v:400}, {c:"2", "60":95, "75":115, "90":130, v:500}, 
-            {c:"1", "60":110, "75":130, "90":145, v:600}, {c:"1/0", "60":125, "75":150, "90":170, v:800}, 
-            {c:"2/0", "60":145, "75":175, "90":195, v:1000}, {c:"3/0", "60":165, "75":200, "90":225, v:1200}, 
-            {c:"4/0", "60":195, "75":230, "90":260, v:1600}, {c:"250", "60":215, "75":255, "90":290, v:2000},
-            {c:"350", "60":260, "75":310, "90":350, v:3000}, {c:"500", "60":320, "75":380, "90":430, v:6000}
-        ];
-
-        let mode, temp, currentObj, score = 0, timer, timeLeft = 10;
+        const data = [{c:"14", "60":15, "75":20, "90":25, v:15}, {c:"12", "60":20, "75":25, "90":30, v:20}, {c:"10", "60":30, "75":35, "90":40, v:60}, {c:"8", "60":40, "75":50, "90":55, v:100}, {c:"6", "60":55, "75":65, "90":75, v:200}, {c:"4", "60":70, "75":85, "90":95, v:300}, {c:"3", "60":85, "75":100, "90":110, v:400}, {c:"2", "60":95, "75":115, "90":130, v:500}, {c:"1", "60":110, "75":130, "90":145, v:600}, {c:"1/0", "60":125, "75":150, "90":170, v:800}, {c:"2/0", "60":145, "75":175, "90":195, v:1000}, {c:"3/0", "60":165, "75":200, "90":225, v:1200}, {c:"4/0", "60":195, "75":230, "90":260, v:1600}, {c:"250", "60":215, "75":255, "90":290, v:2000}, {c:"350", "60":260, "75":310, "90":350, v:3000}, {c:"500", "60":320, "75":380, "90":430, v:6000}];
+        
+        let mode, temp, currentObj, score = 0, record = 0, timer, timeLeft = 10;
 
         function start(m, t) {
-            mode = m; temp = t; score = 0;
+            mode = m; temp = t; score = 0; document.getElementById("score").innerText = score;
             document.getElementById("menu-container").classList.add("hidden");
             document.getElementById("game-container").classList.remove("hidden");
             renderButtons(); generar();
@@ -87,14 +76,16 @@
 
             if(selVal >= targetVal && sel !== "timeout") {
                 score++;
+                if(score > record) { record = score; document.getElementById("record").innerText = record; }
                 fb.className = "text-green-400 font-bold p-2";
-                fb.innerHTML = `✅ ¡Correcto! ${sel} AWG soporta ${selVal}A`;
+                fb.innerHTML = `✅ ¡Correcto!`;
             } else {
+                score = 0;
                 fb.className = "text-red-400 font-bold p-2";
-                fb.innerHTML = `❌ Error: ${sel} AWG soporta ${selVal}A. Necesitabas ${targetVal}A`;
+                fb.innerHTML = `❌ Error: ${targetVal}A requeridos.`;
             }
             document.getElementById("score").innerText = score;
-            setTimeout(generar, 2500);
+            setTimeout(generar, 1500);
         }
     </script>
 </body>
