@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>⚡ NOM ⚡</title>
+    <title>⚡ NOM Game⚡</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="manifest" href="manifest.json">
     <style>body { background:#0b111e; color:white; font-family:sans-serif; }</style>
 </head>
 <body class="min-h-screen flex flex-col items-center p-4">
@@ -14,70 +13,88 @@
     <div id="menu-container" class="w-full max-w-2xl mt-10 text-center">
         <h1 class="text-3xl font-black text-blue-400 mb-6">⚡ NOM⚡</h1>
         <div class="grid grid-cols-2 gap-4">
-            <button onclick="startSupervivencia('310','60')" class="bg-blue-800 p-4 rounded-xl font-bold">310 - 60°C</button>
-            <button onclick="startSupervivencia('310','75')" class="bg-blue-700 p-4 rounded-xl font-bold">310 - 75°C</button>
-            <button onclick="startSupervivencia('310','90')" class="bg-blue-600 p-4 rounded-xl font-bold">310 - 90°C</button>
-            <button onclick="startSupervivencia('250','Tierra')" class="bg-indigo-700 p-4 rounded-xl font-bold">Tabla 250</button>
+            <button onclick="start('310','60')" class="bg-blue-800 p-4 rounded-xl font-bold">310 - 60°C</button>
+            <button onclick="start('310','75')" class="bg-blue-700 p-4 rounded-xl font-bold">310 - 75°C</button>
+            <button onclick="start('310','90')" class="bg-blue-600 p-4 rounded-xl font-bold">310 - 90°C</button>
+            <button onclick="start('250','Tierra')" class="bg-indigo-700 p-4 rounded-xl font-bold">Tabla 250</button>
         </div>
     </div>
 
     <!-- JUEGO -->
     <main id="game-container" class="hidden w-full max-w-xl bg-slate-900/40 p-6 rounded-2xl border border-slate-800">
-        <div class="flex justify-between items-center mb-6">
-            <h1 id="game-title" class="font-bold text-slate-200 text-xl">--</h1>
-            <button onclick="backToMenu()" class="bg-slate-800 py-2 px-4 rounded-lg text-xs font-bold">⬅️ Menú</button>
+        <div class="flex justify-between items-center mb-4">
+            <h1 id="game-title" class="font-bold text-blue-400 text-xl">--</h1>
+            <div class="text-sm font-bold">Puntos: <span id="score">0</span></div>
         </div>
+        
         <div class="bg-slate-950/60 p-6 mb-6 rounded-xl border border-slate-800 text-center">
-            <div id="target-value" class="text-5xl font-black text-blue-500 my-2">--</div>
-            <div id="target-condition" class="text-sm font-bold text-slate-300">--</div>
+            <div id="target-value" class="text-4xl font-black text-blue-500">--</div>
+            <div id="target-condition" class="text-xs text-slate-400 uppercase mt-1">Requiere calibre para:</div>
         </div>
-        <div id="matrix-container" class="grid grid-cols-3 sm:grid-cols-5 gap-2 mb-6"></div>
-        <div id="fast-feedback" class="hidden p-3 rounded-xl text-center font-bold"></div>
+
+        <div id="matrix-container" class="grid grid-cols-4 sm:grid-cols-6 gap-2 mb-6"></div>
+        <div id="feedback" class="text-center font-bold text-lg p-2 rounded-lg"></div>
     </main>
 
     <script>
-        if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }
+        const data = [
+            {c:"14", "60":15, "75":20, "90":25, v:15}, {c:"12", "60":20, "75":25, "90":30, v:20}, 
+            {c:"10", "60":30, "75":35, "90":40, v:60}, {c:"8", "60":40, "75":50, "90":55, v:100}, 
+            {c:"6", "60":55, "75":65, "90":75, v:200}, {c:"4", "60":70, "75":85, "90":95, v:300}, 
+            {c:"3", "60":85, "75":100, "90":110, v:400}, {c:"2", "60":95, "75":115, "90":130, v:500}, 
+            {c:"1", "60":110, "75":130, "90":145, v:600}, {c:"1/0", "60":125, "75":150, "90":170, v:800}, 
+            {c:"2/0", "60":145, "75":175, "90":195, v:1000}, {c:"3/0", "60":165, "75":200, "90":225, v:1200}, 
+            {c:"4/0", "60":195, "75":230, "90":260, v:1600}, {c:"250", "60":215, "75":255, "90":290, v:2000},
+            {c:"350", "60":260, "75":310, "90":350, v:3000}, {c:"500", "60":320, "75":380, "90":430, v:6000}
+        ];
 
-        const data310 = [{c:"14", "60":15, "75":20, "90":25}, {c:"12", "60":20, "75":25, "90":30}, {c:"10", "60":30, "75":35, "90":40}, {c:"8", "60":40, "75":50, "90":55}, {c:"6", "60":55, "75":65, "90":75}, {c:"4", "60":70, "75":85, "90":95}, {c:"3", "60":85, "75":100, "90":110}, {c:"2", "60":95, "75":115, "90":130}, {c:"1", "60":110, "75":130, "90":145}, {c:"1/0", "60":125, "75":150, "90":170}, {c:"2/0", "60":145, "75":175, "90":195}, {c:"3/0", "60":165, "75":200, "90":225}, {c:"4/0", "60":195, "75":230, "90":260}];
-        const data250 = [{c:"14", v:15}, {c:"12", v:20}, {c:"10", v:60}, {c:"8", v:100}, {c:"6", v:200}, {c:"4", v:300}, {c:"3", v:400}, {c:"2", v:500}, {c:"1", v:600}, {c:"1/0", v:800}, {c:"2/0", v:1000}, {c:"3/0", v:1200}, {c:"4/0", v:1600}];
-        
-        let mode, temp, currentObj, lock = false, timerInterval, timeLeft = 10;
+        let mode, temp, currentObj, score = 0, timer, timeLeft = 10;
 
-        function startSupervivencia(m,t){ mode=m; temp=t; document.getElementById("menu-container").classList.add("hidden"); document.getElementById("game-container").classList.remove("hidden"); renderButtons(); generar(); }
-        function backToMenu(){ clearInterval(timerInterval); document.getElementById("game-container").classList.add("hidden"); document.getElementById("menu-container").classList.remove("hidden"); }
+        function start(m, t) {
+            mode = m; temp = t; score = 0;
+            document.getElementById("menu-container").classList.add("hidden");
+            document.getElementById("game-container").classList.remove("hidden");
+            renderButtons(); generar();
+        }
 
-        function renderButtons(){
+        function renderButtons() {
             const cont = document.getElementById("matrix-container"); cont.innerHTML = "";
-            (mode==="310"?data310:data250).forEach(i => {
-                const b = document.createElement("button"); b.className = "bg-slate-800 p-3 rounded-lg font-bold hover:bg-blue-900"; b.innerText = i.c; b.onclick = () => check(i.c); cont.appendChild(b);
+            data.forEach(i => {
+                const b = document.createElement("button");
+                b.className = "bg-slate-800 p-2 rounded-lg font-bold text-xs hover:bg-blue-900";
+                b.innerText = i.c; b.onclick = () => check(i.c); cont.appendChild(b);
             });
         }
 
-        function generar(){
-            lock = false; timeLeft = 10;
-            document.getElementById("fast-feedback").classList.add("hidden");
-            const list = mode==="310"?data310:data250; currentObj = list[Math.floor(Math.random()*list.length)];
+        function generar() {
+            timeLeft = 10;
+            currentObj = data[Math.floor(Math.random() * data.length)];
             document.getElementById("target-value").innerText = (mode==="310"?currentObj[temp]:currentObj.v) + " A";
-            document.getElementById("target-condition").innerText = mode==="310"?temp+"°C":"Tabla 250";
-            
-            clearInterval(timerInterval);
-            timerInterval = setInterval(() => {
+            clearInterval(timer);
+            timer = setInterval(() => {
                 timeLeft--;
                 document.getElementById("game-title").innerText = "⏳ " + timeLeft + "s";
-                if(timeLeft <= 0){ clearInterval(timerInterval); check("timeout"); }
+                if(timeLeft <= 0) check("timeout");
             }, 1000);
         }
 
-        function check(sel){
-            if(lock && sel !== "timeout") return;
-            clearInterval(timerInterval);
-            lock = true;
+        function check(sel) {
+            clearInterval(timer);
             const targetVal = mode==="310"?currentObj[temp]:currentObj.v;
-            const selVal = sel === "timeout" ? 0 : (mode==="310"?data310.find(i=>i.c===sel)[temp]:data250.find(i=>i.c===sel).v);
-            const fb = document.getElementById("fast-feedback");
-            fb.classList.remove("hidden");
-            if(selVal >= targetVal){ fb.className="p-3 bg-green-950/40 text-green-300 font-bold rounded-xl"; fb.innerHTML="✅ Correcto"; setTimeout(generar, 800); }
-            else{ fb.className="p-3 bg-rose-950/40 text-rose-200 font-bold rounded-xl"; fb.innerHTML=sel==="timeout"?"⏰ Tiempo!":"❌ Error"; setTimeout(generar, 2000); }
+            const selObj = data.find(i=>i.c===sel);
+            const selVal = sel === "timeout" ? 0 : (mode==="310"?selObj[temp]:selObj.v);
+            const fb = document.getElementById("feedback");
+
+            if(selVal >= targetVal && sel !== "timeout") {
+                score++;
+                fb.className = "text-green-400 font-bold p-2";
+                fb.innerHTML = `✅ ¡Correcto! ${sel} AWG soporta ${selVal}A`;
+            } else {
+                fb.className = "text-red-400 font-bold p-2";
+                fb.innerHTML = `❌ Error: ${sel} AWG soporta ${selVal}A. Necesitabas ${targetVal}A`;
+            }
+            document.getElementById("score").innerText = score;
+            setTimeout(generar, 2500);
         }
     </script>
 </body>
